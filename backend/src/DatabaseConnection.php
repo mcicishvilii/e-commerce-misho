@@ -13,15 +13,26 @@ class DatabaseConnection
 
     private function __construct()
     {
+        $host = "localhost";
+        $dbname = "mishosdb";
+        $user = "root";
+        $password = "123456";
+
+        if (!$host || !$dbname || !$user) {
+            throw new \Exception("Database configuration is incomplete. Please check your environment variables.");
+        }
+
         try {
             $this->pdo = new PDO(
-                'mysql:host=' . getenv('DB_HOST') . ';dbname=' . getenv('DB_NAME'),
-                getenv('DB_USER'),
-                getenv('DB_PASSWORD')
+                "mysql:host=$host;dbname=$dbname",
+                $user,
+                $password
             );
             $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            error_log("Database connection successful");
         } catch (PDOException $e) {
-            echo 'Connection failed: ' . $e->getMessage();
+            error_log("Connection failed: " . $e->getMessage());
+            throw new \Exception("Database connection failed: " . $e->getMessage());
         }
     }
 

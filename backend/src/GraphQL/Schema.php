@@ -6,39 +6,62 @@ namespace App\GraphQL;
 use GraphQL\Type\Schema as GraphQLSchema;
 use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Definition\ObjectType;
+use App\Models\Product;
+use App\Models\Category;
 
 class Schema
 {
     public static function buildSchema()
     {
+        $productType = new ObjectType([
+            'name' => 'Product',
+            'fields' => [
+                'id' => Type::int(),
+                'name' => Type::string(),
+                'in_stock' => Type::boolean(),
+                'description' => Type::string(),
+                'brand' => Type::string(),
+                'category' => [
+                    'type' => self::categoryType(),
+                    'resolve' => function ($product) {
+                        $category = new Category();
+                        return $category->find($product['category_id']);
+                    }
+                ],
+            ]
+        ]);
+
         return new GraphQLSchema([
             'query' => new ObjectType([
                 'name' => 'Query',
                 'fields' => [
-                    'messages' => [
-                        'type' => Type::listOf(Type::string()),
+                    'products' => [
+                        'type' => Type::listOf($productType),
                         'resolve' => function () {
-                            // Fetch messages from the database (placeholder)
-                            return ['Message 1', 'Message 2'];
+                            $product = new Product();
+                            return $product->all();
+                        }
+                    ],
+                    'categories' => [
+                        'type' => Type::listOf(self::categoryType()),
+                        'resolve' => function () {
+                            $category = new Category();
+                            return $category->all();
                         }
                     ]
                 ]
             ]),
-            'mutation' => new ObjectType([
-                'name' => 'Mutation',
-                'fields' => [
-                    'addMessage' => [
-                        'type' => Type::string(),
-                        'args' => [
-                            'message' => Type::nonNull(Type::string())
-                        ],
-                        'resolve' => function ($root, $args) {
-                            // Save the message to the database (placeholder)
-                            return $args['message'];
-                        }
-                    ]
-                ]
-            ])
+        ]);
+    }
+
+    private static function categoryType()
+    {
+        return new ObjectType([
+            'name' => 'Category',
+            'fields' => [
+                'id' => Type::int(),
+                'name' => Type::string(),
+            ]
         ]);
     }
 }
