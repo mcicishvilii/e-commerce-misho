@@ -46,8 +46,17 @@ class Schema
                 'fields' => [
                     'products' => [
                         'type' => Type::listOf($productType),
-                        'resolve' => function () {
+                        'args' => [
+                            'filter' => [
+                                'type' => Type::string(),
+                                'defaultValue' => null
+                            ]
+                        ],
+                        'resolve' => function ($root, $args) {
                             $product = new Product();
+                            if ($args['filter']) {
+                                return $product->getByCategory($args['filter']);
+                            }
                             return $product->all();
                         }
                     ],
