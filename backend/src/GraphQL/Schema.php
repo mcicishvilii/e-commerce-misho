@@ -38,6 +38,7 @@ class Schema
                     }
                 ],
             ]
+            
         ]);
 
         return new GraphQLSchema([
