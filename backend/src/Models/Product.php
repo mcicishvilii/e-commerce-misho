@@ -7,4 +7,7 @@ class Product extends BaseModel
 {
     protected $table = 'product';
     
+    protected $casts = [
+        'gallery' => 'array'
+    ];
 }

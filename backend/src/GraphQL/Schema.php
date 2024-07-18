@@ -8,6 +8,7 @@ use GraphQL\Type\Definition\Type;
 use GraphQL\Type\Definition\ObjectType;
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\ProductGallery;
 
 class Schema
 {
@@ -21,6 +22,14 @@ class Schema
                 'in_stock' => Type::boolean(),
                 'description' => Type::string(),
                 'brand' => Type::string(),
+                'gallery' => [
+                    'type' => Type::listOf(Type::string()),
+                    'resolve' => function ($product) {
+                        $productGallery = new ProductGallery();
+                        $images = $productGallery->getImagesForProduct($product['id']);
+                        return array_column($images, 'image_url');
+                    }
+                ],
                 'category' => [
                     'type' => self::categoryType(),
                     'resolve' => function ($product) {
